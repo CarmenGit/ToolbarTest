@@ -24,7 +24,7 @@ import es.cice.toolbartest.adapters.CarAdapter;
 import es.cice.toolbartest.model.Car;
 
 public class MainActivity extends AppCompatActivity {
-
+    private CarAdapter adapter;
     private ActionBar aBar;
     public static final String TAG= "MainActivity";
     private EditText searchET;
@@ -36,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         aBar =getSupportActionBar();
         RecyclerView carRV=(RecyclerView) findViewById(R.id.carRV);
-        carRV.setAdapter(new CarAdapter(this, getData()));
+        adapter = new CarAdapter(this, getData());
+        carRV.setAdapter(adapter);
+        //le dice cómo tiene que mostrar las filas. con un linearlayout
         carRV.setLayoutManager(new LinearLayoutManager(this));
+        //filter va a llamar a performFiltering(filtramos los datos) y publishResults
+        //adapter.getFilter().filter("dkjf");
 
     }
     private List<Car> getData()
@@ -82,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     //ESTE EVENTO se produce cada vez que pulsamos una tecla o acciones (iconos verdes, ej lupa)
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                         if (actionId== EditorInfo.IME_ACTION_SEARCH){
-                            String searchText=searchET.getText().toString();
+                          CharSequence searchText=searchET.getText();
                             //empezar la busqueda y hacer desaparecer el teclado
                             Log.d(TAG, "search text ...." + searchText);
                             //Hacer desaparecer el teclado, llamamos a un servicio del sistema q se encarga de hacer aparecer/desaparecer el teclado
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                             aBar.setDisplayShowCustomEnabled(false);
                             //para q desaparezca el título
                             aBar.setDisplayShowTitleEnabled(true);
+                            adapter.getFilter().filter(searchText);
                             //empezar la busqueda. Mostramos lista de vehículos
 
                             return true;

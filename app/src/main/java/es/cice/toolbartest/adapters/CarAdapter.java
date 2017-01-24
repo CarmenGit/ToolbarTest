@@ -1,19 +1,20 @@
 package es.cice.toolbartest.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import es.cice.toolbartest.CarDetailActivity;
 import es.cice.toolbartest.R;
 import es.cice.toolbartest.model.Car;
 
@@ -21,7 +22,7 @@ import es.cice.toolbartest.model.Car;
  * Created by cice on 20/1/17.
  */
 
-public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
+public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> implements Filterable {
 
     private List<Car> carList;
     private Context ctx;
@@ -34,26 +35,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
 
       */
 
-    /**
-     * Called when RecyclerView needs a new {@link ViewHolder} of the given type to represent
-     * an item.
-     * <p>
-     * This new ViewHolder should be constructed with a new View that can represent the items
-     * of the given type. You can either create a new View manually or inflate it from an XML
-     * layout file.
-     * <p>
-     * The new ViewHolder will be used to display items of the adapter using
-     * {@link #(ViewHolder, int, List)}. Since it will be re-used to display
-     * different items in the data set, it is a good idea to cache references to sub views of
-     * the View to avoid unnecessary {@link View#findViewById(int)} calls.
-     *
-     * @param parent   The ViewGroup into which the new View will be added after it is bound to
-     *                 an adapter position.
-     * @param viewType The view type of the new View.
-     * @return A new ViewHolder that holds a View of the given view type.
-     * @see #getItemViewType(int)
-     * @see #onBindViewHolder(ViewHolder, int)
-     */
+
     @Override
     //para crear un fila nueva
     public CarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,26 +48,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
         return holder;
     }
 
-    /**
-     * Called by RecyclerView to display the data at the specified position. This method should
-     * update the contents of the {@link ViewHolder#itemView} to reflect the item at the given
-     * position.
-     * <p>
-     * Note that unlike {@link ListView}, RecyclerView will not call this method
-     * again if the position of the item changes in the data set unless the item itself is
-     * invalidated or the new position cannot be determined. For this reason, you should only
-     * use the <code>position</code> parameter while acquiring the related data item inside
-     * this method and should not keep a copy of it. If you need the position of an item later
-     * on (e.g. in a click listener), use {@link ViewHolder#getAdapterPosition()} which will
-     * have the updated adapter position.
-     * <p>
-     * Override {@link(ViewHolder, int, List)} instead if Adapter can
-     * handle efficient partial bind.
-     *
-     * @param holder   The ViewHolder which should be updated to represent the contents of the
-     *                 item at the given position in the data set.
-     * @param position The position of the item within the adapter's data set.
-     */
+
     @Override
     public void onBindViewHolder(CarAdapter.ViewHolder holder, int position) {
         //se recicla la fila
@@ -103,6 +66,14 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return carList.size();
+    }
+
+
+    @Override
+    //los adaptadores filtrables tienen asociado un filtro. Con él podemos establecer restricciones a las fuentees e datos
+    public Filter getFilter() {
+
+        return new CarFilter();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -126,7 +97,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
                     Log.d("CardViewHolder", "old position: "+ getOldPosition());
                     Log.d("CardViewHolder", "layout position: " + getLayoutPosition());
                     Log.d("CardViewHolder", "adapter position: " + getAdapterPosition());
-                    Intent intent=new Intent(ctx, CarDetailActivity.class);
+                   /* Intent intent=new Intent(ctx, CarDetailActivity.class);
                     intent.putExtra(CarDetailActivity.IMAGEN_EXTRA,
                             carList.get(getAdapterPosition()).getImagen());
                     intent.putExtra(CarDetailActivity.DESCRIPCION_EXTRA,
@@ -135,10 +106,51 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.ViewHolder> {
                             carList.get(getAdapterPosition()).getFabricante());
                     intent.putExtra(CarDetailActivity.MODELO_EXTRA,
                             carList.get(getAdapterPosition()).getModelo());
-                    ctx.startActivity(intent);
+                    ctx.startActivity(intent);*/
 
-                }
+                }//onClick
             });
+        }
+    }
+    //clase interna que hace el filtro
+    public class CarFilter extends Filter{
+        public static final String TAG="CarFilter";
+        private List<Car> originalList;
+        private List<Car> filteredList;
+        public CarFilter(){
+            originalList=new LinkedList<>(carList);
+            filteredList=new ArrayList<>();//lista vacía
+
+        }
+        @Override
+        protected FilterResults performFiltering(CharSequence filterData) {
+            Log.d(TAG, "performFiltering....");
+            String filterStr=filterData.toString();
+            FilterResults results = new FilterResults();
+            filteredList=new ArrayList<>();
+            for(Car car:originalList){
+                if(car.getFabricante().equalsIgnoreCase(filterStr) ||
+                        car.getModelo().equalsIgnoreCase(filterStr)){
+                    filteredList.add(car);
+                }
+            }
+            results.values=filteredList;
+            results.count=filteredList.size();
+
+            return results;
+        }
+
+
+        @Override
+        //aquí definimos cómo modificamos el adaptador a partir de los datos filtrados
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            carList=(List<Car>) results.values;
+            //List <Car> list=(List<Car>) results.values;
+            //if (list.size()==0)
+
+            notifyDataSetChanged();
+
+
         }
     }
 }
