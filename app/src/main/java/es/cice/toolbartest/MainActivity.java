@@ -1,7 +1,6 @@
 package es.cice.toolbartest;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +10,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -29,13 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public void startNewActivity(View v) {
-        Intent intent = new Intent(this, AboutActivity.class);
-        //ahora le pasamos información, los extras se parecen a un mapa, tienen clave
-        intent.putExtra(AboutActivity.EXTRA_KEY, v.toString());
-        //lo lanzamos
-        startActivity(intent);
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,12 +79,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.aboutIT:
                 Log.d(TAG, "About...");
-
-                /*Intent intent = new Intent(this, AboutActivity.class);
-                //ahora le pasamos información, los extras se parecen a un mapa, tienen clave
-                intent.putExtra(AboutActivity.EXTRA_KEY, "Esta aplicación");
-                //lo lanzamos
-                startActivity(intent);*/
+                TextView txt = (TextView)findViewById(R.id.txtDesc);
+                txt.setText("Esta aplicación muestra una barra de herramientas.");
                 break;
         }
         return super.onOptionsItemSelected(item);
